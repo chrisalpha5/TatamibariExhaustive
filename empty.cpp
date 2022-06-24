@@ -292,13 +292,50 @@ bool exist(vector<vector<string> > sol, vector<string> check){
     return false;
 }
 
+bool similar(vector<vector<string> > sol, vector<string> check){
+    for (int i = 0; i < sol.size(); i++){
+        bool sim = true;
+        for (int j = 0; j < sol[i].size() && sim; j++){
+            if (sol[i][j][0] != check[j][0]){
+                sim = false;
+            }
+        }
+
+        if (sim){
+            char arr[50];
+            for (int j = 0; j < 50; j++){
+                arr[j] = '0';
+            }
+            for (int j = 0; j < sol[i].size();j++ ){
+                if(arr[sol[i][j][1] - '0'] == '0'){
+                    arr[sol[i][j][1] - '0'] = check[j][1];
+                }
+            }
+            for (int j=0; j < check.size();j++){
+                check[j][1] = arr[check[j][1] - '0'];
+            }
+            for (int j = 0; j < check.size(); j++){
+                if (sol[i] == check){
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    return false;
+}
+
 int main(){
 
     vector<vector<string> > cells;
     vector<vector<string> > solution;
     int m, n;
-    m = 3;
-    n = 3;
+    
+    cin >> m >> n;
+
+    //for (int TEMPO = 0; TEMPO < 3; TEMPO++){
+
+    auto begin = std::chrono::high_resolution_clock::now();
 
     for (int i = 0; i < m; i++){
         vector<string> v1;
@@ -352,9 +389,12 @@ int main(){
                     }
                 }
                 
+                
                 if (!solution.empty()){
                     if (!exist(solution, temp2)){
-                        solution.push_back(temp2);
+                        if (!similar(solution, temp2)){
+                             solution.push_back(temp2);
+                        }
                     }
                 } else {
                     solution.push_back(temp2);
@@ -367,6 +407,7 @@ int main(){
 
     cout << solution.size() << endl;
 
+    /**
     for (int i = 0; i < solution.size(); i++){
         int x = 0;
         for (int j = 0; j < m; j++){
@@ -378,6 +419,12 @@ int main(){
         }
         cout << endl;
     }
+    **/
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    
+    printf("Time measured: %.5f seconds.\n", elapsed.count() * 1e-9);
 
     return 0;
 }
