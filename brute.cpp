@@ -17,9 +17,9 @@ vector<string> idfier(vector<vector<string> >& cells, int m, int n){
 }
 
 vector<string> possibleRegion(vector<vector<string> > cells, int m, int n, int r, int c){
-    int minr = 0;
+    int minr = -1;
     int maxr = m;
-    int minc = 0;
+    int minc = -1;
     int maxc = n;
     int i,j,lim;
 
@@ -67,8 +67,8 @@ vector<string> possibleRegion(vector<vector<string> > cells, int m, int n, int r
 
     lim = maxc;
     i = r - 1;
-    j = c + 1;
-    while (i >= minr){
+    while (i > minr){
+        j = c + 1;
         while (j < lim){
             if (cells[i][j] != "*"){
                 list.push_back(cells[i][j]);
@@ -82,9 +82,9 @@ vector<string> possibleRegion(vector<vector<string> > cells, int m, int n, int r
 
     lim = minc;
     i = r + 1;
-    j = c - 1;
     while (i < maxr){
-        while (j >= lim){
+        j = c - 1;
+        while (j > lim){
             if (cells[i][j] != "*"){
                 list.push_back(cells[i][j]);
                 lim = j;
@@ -97,9 +97,9 @@ vector<string> possibleRegion(vector<vector<string> > cells, int m, int n, int r
 
     lim = minc;
     i = r - 1;
-    j = c - 1;
-    while (i >= minr){
-        while (j >= lim){
+    while (i > minr){
+        j = c - 1;
+        while (j > lim){
             if (cells[i][j] != "*"){
                 list.push_back(cells[i][j]);
                 lim = j;
@@ -112,8 +112,8 @@ vector<string> possibleRegion(vector<vector<string> > cells, int m, int n, int r
 
     lim = maxc;
     i = r + 1;
-    j = c + 1;
     while (i < maxr){
+        j = c + 1;
         while (j < lim){
             if (cells[i][j] != "*"){
                 list.push_back(cells[i][j]);
@@ -273,9 +273,8 @@ int main()
 {
 
     int m, n;
-    //vector<vector<string> > cells;
+    vector<vector<string> > cells;
 
-    /**
     //INPUT//
     cin >> m >> n;
     for (int i = 0; i < m; i++){
@@ -288,18 +287,9 @@ int main()
         cells.push_back(v1);
     }
     //END OF INPUT//
-    **/
+    
 
    auto begin = std::chrono::high_resolution_clock::now();
-
-    m = 1;
-    n = 4;
-
-
-    vector<vector<string> > cells
-    {
-        {"+", "+", "+", "+"}
-    };
 
     vector<string> id = idfier(cells, m, n);
 
@@ -315,7 +305,9 @@ int main()
 
     vector<vector<int> > solution;
 
-    for (int i = 0 ; i < comList.size(); i++){
+    bool Sol = true;
+
+    for (int i = 0 ; i < comList.size() && Sol; i++){
 
         for (int j = 0; j < hintsLoc.size(); j++){
             config[hintsLoc[j].first][hintsLoc[j].second] = comList[i][j];
@@ -329,6 +321,7 @@ int main()
                 }
             }
             solution.push_back(temp2);
+            Sol = false;
         }
     }
 
