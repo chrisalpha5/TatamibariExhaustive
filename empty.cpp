@@ -351,101 +351,103 @@ vector<vector<string> > combination (vector<vector<string> >& arr){
     }
 }
 
-
-int calcRow(vector<vector<string> > cells, vector<vector<bool> >& checked, string check, int a, int b, int m){
-    int r = 1;
-    for (int i = a+1; i < m; i++){
-        if (cells[i][b] == check){
-            checked[i][b] = true;
-            r += 1;
-        } else {
-            break;
+int existId(vector<pair<string, pair< pair<int,int>, pair<int,int> > > > v, string h){
+    for (int i = 0; i < v.size(); i++){
+        if (h == v[i].first){
+            return i;
         }
     }
-    return r;
+    return -1;
 }
 
-int calcCol(vector<vector<string> > cells, vector<vector<bool> >& checked, string check, int a, int b, int n){
-    int c = 1;
-    for (int i = b+1; i < n; i++){
-        if (cells[a][i] == check){
-            checked[a][i] = true;
-            c += 1;
-        } else {
-            break;
-        }
-    }
-    return c;
-}
-
-bool calcRem(vector<vector<string> > cells, vector<vector<bool> >& checked, string check, int a, int b, int r, int c){
-    for (int i = a+1; i < a+r; i++){
-        for (int j = b+1; j < b+c; j++){
-            checked[i][j] = true;
-            if (cells[i][j] != check){
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-bool checkCorner(vector<vector<string> > cells, int a, int b, int r, int c, int m, int n){
-    if ((a+r != m) && (b+c !=n)){
-        if ((cells[a+r][b+c] != cells[a+r-1][b+c]) && (cells[a+r][b+c] != cells [a+r][b+c-1])){
-            return false;
-        }
-    }
-    return true;
-}
-
-bool checkRed(vector<vector<string> > cells, vector<vector<bool> >& checked, string check, int m, int n){
+vector<pair<string, pair< pair<int,int>, pair<int,int> > > > findHint (vector<vector<string> > cells, int m, int n){
+    vector<pair<string, pair< pair<int,int>, pair<int,int> > > > l;
     for (int i = 0; i < m; i++){
         for (int j = 0; j < n; j++){
-            if (!(checked[i][j]) && check == cells[i][j]){
-                return false;
+            if (l.empty()){
+                l.push_back(make_pair(cells[i][j],make_pair(make_pair(i,j),make_pair(i,j))));
+            } else {
+                int e = existId(l,cells[i][j]);
+                if (e == -1){
+                    l.push_back(make_pair(cells[i][j],make_pair(make_pair(i,j),make_pair(i,j))));
+                } else {
+                    l[e].second.second.first = i;
+                    l[e].second.second.second = j;
+                }
             }
+        }
+    }
+
+    return l;
+}
+
+bool verify (string check, vector<vector<string> > cells, int m, int n, int r1, int c1, int r2, int c2){
+    if ((check[0] == '-' && (r2-r1 >= c2-c1)) ||
+        (check[0] == '|' && (r2-r1 <= c2-c1)) ||
+        (check[0] == '+' && (r2-r1 != c2-c1))){
+            return false;
+        }
+
+    for (int i = 0; i < m; i++){
+        for(int j = 0; j < n; j++){
+            if (((i < r1 || i > r2 || j < c1 || j > c2) && check == cells[i][j]) ||
+                ((i >= r1 && i <= r2 && j >= c1 && j <= c2) && check != cells[i][j])){
+                return false;
+                }
+        }
+    }
+
+    return true;
+}
+
+bool corner(vector<vector<string> > cells, int m, int n){
+    for (int i = 0; i < m-1; i++){
+        for (int j = 0; j < n-1; j++){
+            if (cells[i][j] != cells[i+1][j] &&
+                cells[i][j] != cells[i][j+1] &&
+                cells[i][j] != cells[i+1][j+1] &&
+                cells[i+1][j] != cells[i][j+1] &&
+                cells[i+1][j] != cells[i+1][j+1] &&
+                cells[i][j+1] != cells[i+1][j+1]){
+                    return false;
+                }
         }
     }
     return true;
 }
 
-bool verifier (vector<vector<string> >cells, int m, int n){
-    vector<vector<bool> > checked;
+int verifier(vector<vector<string> > cells, int m, int n){
     for (int i = 0; i < m; i++){
-        vector<bool> v1 (n, false);
-        checked.push_back(v1);
+        vector<string> v1;
+        for (int j = 0; j < n; j++){
+            string temp;
+            cin >> temp;
+            v1.push_back(temp);
+        }
+        cells.push_back(v1);
     }
+
+    vector<pair<string, pair< pair<int,int>, pair<int,int> > > > hintList;
+    hintList = findHint(cells,m,n);
+
+    for (int t = 0; t < 5; t++){
 
     bool valid = true;
+    for (int i = 0; i < hintList.size() && valid; i++){
+        string check = hintList[i].first;
+        int r1 = hintList[i].second.first.first;
+        int c1 = hintList[i].second.first.second;
+        int r2 = hintList[i].second.second.first;
+        int c2 = hintList[i].second.second.second;
 
-    for (int a = 0; a < m; a++){
-        for (int b = 0; b < n; b++){
-            if (valid && !(checked[a][b])){
-                string check = cells[a][b];
-                checked[a][b] = true;
-
-                int r = calcRow(cells, checked, check, a, b, m);
-                int c = calcCol(cells, checked, check, a, b, n);
-
-                if (valid && (check[0] == '-' && r>=c) || (check[0] == '|' && r<=c) || (check[0] == '+' && r!=c)){
-                    valid = false;
-                } else {
-                    valid = calcRem(cells, checked, check, a, b, r, c);
-                }
-
-                if (valid){
-                    valid = checkCorner(cells,a,b,r,c,m,n);
-                }
-
-                if (valid){
-                    valid = checkRed(cells,checked,check,m,n);
-                }
-
-            }
-        }
+        valid = (verify(check,cells,m,n,r1,c1,r2,c2));
     }
-    return valid;
+
+    if (valid && corner(cells,m,n)){
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool exist(vector<vector<string> > sol, vector<string> check){
